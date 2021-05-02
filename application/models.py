@@ -9,7 +9,7 @@ from sqlalchemy import (
     Column, Integer, DateTime, Table,
     TIMESTAMP, Boolean, String, ForeignKey, Text)
 from sqlalchemy.orm import relationship, declared_attr
-from . import db
+from . import db, mm
 
 
 class TimestampMixin(object):
@@ -23,6 +23,7 @@ class TimestampMixin(object):
 
 class User(db.Model):
     __tablename__ = 'user'
+    # __table_args__ = {'extend_existing': True}
     id = Column(Integer, primary_key=True, autoincrement=True)
     public_id = Column(String, default=os.urandom(5).hex('X', 3),
                        nullable=False)
@@ -198,3 +199,45 @@ class Dish(db.Model):
             return g.user.id
         except Exception:
             return None
+
+
+class UserSchema(mm.SQLAlchemyAutoSchema):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    class Meta:
+        model = User
+        alchemy_session = db.session
+        load_instance = True
+#         # exclude = ['password', 'email']
+
+
+class MenuCardSchema(mm.SQLAlchemyAutoSchema):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    class Meta:
+        model = MenuCard
+        alchemy_session = db.session
+        load_instance = True
+
+
+class DishSchema(mm.SQLAlchemyAutoSchema):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    class Meta:
+        model = Dish
+        alchemy_session = db.session
+        load_instance = True
+
+
+users_schema = UserSchema(many=True, exclude=('id', 'password', 'email'))
+user_schema = UserSchema()
+
+menus_schema = MenuCardSchema(many=True, exclude=('id', 'public_card'))
+menu_schema = MenuCardSchema()
+
+dishes_schema = DishSchema(many=True, exclude=('id', 'image_thumbnail'))
+dish_schema = DishSchema()
+

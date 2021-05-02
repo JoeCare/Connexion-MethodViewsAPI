@@ -72,12 +72,13 @@ def create_app():
         from . import routes, models  # not obviously necessary
         from api import menus_view, dishes_view
         # create db tables - models objects
+        db.metadata.clear()
         db.create_all()
 
-        # conn_app.add_url_rule('/menus', endpoint='menus',
-        #                       view_func=menus_view)
-        # conn_app.add_url_rule('/dishes', endpoint='dishes',
-        #                       view_func=dishes_view)
+        conn_app.add_url_rule('/menus', endpoint='menus',
+                              view_func=menus_view)
+        conn_app.add_url_rule('/dishes', endpoint='dishes',
+                              view_func=dishes_view)
         # Register Blueprints
         # app.register_blueprint(profile.account_bp)
         # app.register_blueprint(home.home_bp)
