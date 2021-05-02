@@ -1,17 +1,24 @@
 from flask import jsonify
 from flask.views import MethodView
-from application.models import MenuCard, menu_schema, menus_schema
+from application.models import MenuCard  #, menu_schema, menus_schema
 
 
 class MenusView(MethodView):
 
-    def get(self):
-        menus = MenuCard.query.all()
-        if menus:
-            schemas = menus_schema.dump(menus)
-            return jsonify(200, schemas)
+    def get(self, pk):
+
+        if pk:
+            pass
         else:
-            return jsonify(404, "Not found any records")
+            menus = MenuCard.query.all()
+
+            return jsonify({'menus': menus})
+
+    # if menus:
+        #     schemas = menus_schema.dump(menus)
+        #     return jsonify(200, schemas)
+        # else:
+        #     return jsonify(404, "Not found any records")
 
         # output = []
         #
@@ -27,16 +34,14 @@ class MenusView(MethodView):
         #     menu_data['vegetarian_card'] = user.admin
         #     output.append(menu_data)
 
-        # return jsonify({'users' : output})
-
     def post(self):
         pass
 
-    def put(self):
+    def put(self, pk):
         pass
 
-    def delete(self):
+    def delete(self, pk):
         pass
 
 
-menus_view = MenusView.as_view('menus')
+menus_view = MenusView.as_view('menus-api')

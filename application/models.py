@@ -23,7 +23,7 @@ class TimestampMixin(object):
 
 class User(db.Model):
     __tablename__ = 'user'
-    # __table_args__ = {'extend_existing': True}
+    __table_args__ = {'extend_existing': True}
     id = Column(Integer, primary_key=True, autoincrement=True)
     public_id = Column(String, default=os.urandom(5).hex('X', 3),
                        nullable=False)
@@ -95,44 +95,44 @@ class MenuCard(db.Model):
     changed_on = Column(DateTime, default=datetime.datetime.now,
                         onupdate=datetime.datetime.now, nullable=False)
 
-    @declared_attr
-    def created_by_fk(cls):
-        return Column(Integer, ForeignKey("ab_user.id"),
-                      default=cls.get_user_id, nullable=False
-                      )
-
-    @declared_attr
-    def created_by(cls):
-        return relationship(
-            "User",
-            primaryjoin="%s.created_by_fk == User.id" % cls.__name__,
-            enable_typechecks=False,
-            )
-
-    @declared_attr
-    def changed_by_fk(cls):
-        return Column(
-            Integer,
-            ForeignKey("ab_user.id"),
-            default=cls.get_user_id,
-            onupdate=cls.get_user_id,
-            nullable=False,
-            )
-
-    @declared_attr
-    def changed_by(cls):
-        return relationship(
-            "User",
-            primaryjoin="%s.changed_by_fk == User.id" % cls.__name__,
-            enable_typechecks=False,
-            )
-
-    @classmethod
-    def get_user_id(cls):
-        try:
-            return g.user.id
-        except Exception:
-            return None
+    # @declared_attr
+    # def created_by_fk(cls):
+    #     return Column(Integer, ForeignKey("ab_user.id"),
+    #                   default=cls.get_user_id, nullable=False
+    #                   )
+    #
+    # @declared_attr
+    # def created_by(cls):
+    #     return relationship(
+    #         "User",
+    #         primaryjoin="%s.created_by_fk == User.id" % cls.__name__,
+    #         enable_typechecks=False,
+    #         )
+    #
+    # @declared_attr
+    # def changed_by_fk(cls):
+    #     return Column(
+    #         Integer,
+    #         ForeignKey("ab_user.id"),
+    #         default=cls.get_user_id,
+    #         onupdate=cls.get_user_id,
+    #         nullable=False,
+    #         )
+    #
+    # @declared_attr
+    # def changed_by(cls):
+    #     return relationship(
+    #         "User",
+    #         primaryjoin="%s.changed_by_fk == User.id" % cls.__name__,
+    #         enable_typechecks=False,
+    #         )
+    #
+    # @classmethod
+    # def get_user_id(cls):
+    #     try:
+    #         return g.user.id
+    #     except Exception:
+    #         return None
 
 
 class Dish(db.Model):
@@ -143,8 +143,8 @@ class Dish(db.Model):
     price = Column(String(6), nullable=False, default='9.99')
     preparation_time = Column(Integer, nullable=False, default=30)
     vegetarian = Column(Boolean)
-    menu_card = relationship(
-        "MenuCard", secondary=assoc_menu_dish, backref='dishes')
+    # menu_card = relationship(
+    #     "MenuCard", secondary=assoc_menu_dish, backref='dish')
     # menu_id = Column(Integer, ForeignKey('menu_card.id'))
     image_thumbnail = Column(Text)
 
@@ -161,44 +161,44 @@ class Dish(db.Model):
     changed_on = Column(DateTime, default=datetime.datetime.now,
                         onupdate=datetime.datetime.now, nullable=False)
 
-    @declared_attr
-    def created_by_fk(cls):
-        return Column(Integer, ForeignKey("ab_user.id"),
-                      default=cls.get_user_id, nullable=False
-                      )
-
-    @declared_attr
-    def created_by(cls):
-        return relationship(
-            "User",
-            primaryjoin="%s.created_by_fk == User.id" % cls.__name__,
-            enable_typechecks=False,
-            )
-
-    @declared_attr
-    def changed_by_fk(cls):
-        return Column(
-            Integer,
-            ForeignKey("ab_user.id"),
-            default=cls.get_user_id,
-            onupdate=cls.get_user_id,
-            nullable=False,
-            )
-
-    @declared_attr
-    def changed_by(cls):
-        return relationship(
-            "User",
-            primaryjoin="%s.changed_by_fk == User.id" % cls.__name__,
-            enable_typechecks=False,
-            )
-
-    @classmethod
-    def get_user_id(cls):
-        try:
-            return g.user.id
-        except Exception:
-            return None
+    # @declared_attr
+    # def created_by_fk(cls):
+    #     return Column(Integer, ForeignKey("ab_user.id"),
+    #                   default=cls.get_user_id, nullable=False
+    #                   )
+    #
+    # @declared_attr
+    # def created_by(cls):
+    #     return relationship(
+    #         "User",
+    #         primaryjoin="%s.created_by_fk == User.id" % cls.__name__,
+    #         enable_typechecks=False,
+    #         )
+    #
+    # @declared_attr
+    # def changed_by_fk(cls):
+    #     return Column(
+    #         Integer,
+    #         ForeignKey("ab_user.id"),
+    #         default=cls.get_user_id,
+    #         onupdate=cls.get_user_id,
+    #         nullable=False,
+    #         )
+    #
+    # @declared_attr
+    # def changed_by(cls):
+    #     return relationship(
+    #         "User",
+    #         primaryjoin="%s.changed_by_fk == User.id" % cls.__name__,
+    #         enable_typechecks=False,
+    #         )
+    #
+    # @classmethod
+    # def get_user_id(cls):
+    #     try:
+    #         return g.user.id
+    #     except Exception:
+    #         return None
 
 
 class UserSchema(mm.SQLAlchemyAutoSchema):
@@ -240,4 +240,3 @@ menu_schema = MenuCardSchema()
 
 dishes_schema = DishSchema(many=True, exclude=('id', 'image_thumbnail'))
 dish_schema = DishSchema()
-

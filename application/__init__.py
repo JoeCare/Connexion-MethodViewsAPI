@@ -70,15 +70,40 @@ def create_app():
     with app.app_context():
         # Import parts of our application
         from . import routes, models  # not obviously necessary
-        from api import menus_view, dishes_view
+        from api import menus_view, dishes_view, cards_view, users_view
         # create db tables - models objects
-        db.metadata.clear()
+        # db.metadata.clear()
         db.create_all()
 
-        conn_app.add_url_rule('/menus', endpoint='menus',
-                              view_func=menus_view)
-        conn_app.add_url_rule('/dishes', endpoint='dishes',
-                              view_func=dishes_view)
+        conn_app.add_url_rule('/users', defaults={"pk": None},
+                              view_func=users_view, methods=['GET'])
+        conn_app.add_url_rule('/users', view_func=users_view,
+                              methods=['POST'])
+        conn_app.add_url_rule('/users/<int:pk>', view_func=users_view,
+                              methods=['GET', 'PUT', 'DELETE'])
+
+        conn_app.add_url_rule('/menus', defaults={"pk": None},
+                              view_func=menus_view, methods=['GET'])
+        conn_app.add_url_rule('/menus', view_func=menus_view,
+                              methods=['POST'])
+        conn_app.add_url_rule('/menus/<int:pk>', view_func=menus_view,
+                              methods=['GET', 'PUT', 'DELETE'])
+
+        conn_app.add_url_rule('/cards', defaults={"pk": None},
+                              view_func=cards_view, methods=['GET'])
+        conn_app.add_url_rule('/cards', view_func=cards_view,
+                              methods=['POST'])
+        conn_app.add_url_rule('/cards/<int:pk>', view_func=cards_view,
+                              methods=['GET', 'PUT', 'DELETE'])
+
+        conn_app.add_url_rule('/dishes', defaults={"pk": None},
+                              view_func=dishes_view, methods=['GET'])
+        conn_app.add_url_rule('/dishes', view_func=dishes_view,
+                              methods=['POST'])
+        conn_app.add_url_rule('/dishes/<int:pk>', view_func=dishes_view,
+                              methods=['GET', 'PUT', 'DELETE'])
+
+
         # Register Blueprints
         # app.register_blueprint(profile.account_bp)
         # app.register_blueprint(home.home_bp)

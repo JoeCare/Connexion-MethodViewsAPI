@@ -2,16 +2,16 @@ from flask.views import MethodView
 
 
 class CardsView(MethodView):
-    def get(self):
-        pass
+    def get(self, pk):
+        return "get"
 
     def post(self):
+        return "post"
+
+    def put(self, pk):
         pass
 
-    def put(self):
-        pass
-
-    def delete(self):
+    def delete(self, pk):
         pass
 
 
