@@ -1,0 +1,25 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+connexion= "*"
+openapi-spec-validator= "==0.2.8"
+swagger_ui_bundle= "*"
+jwt= "*"
+PyJWT= "*"
+SQLAlchemy = "*"
+marshmallow-sqlalchemy = "*"
+marshmallow = "*"
+flask-marshmallow = "*"
+Flask = "*"
+Flask-SQLAlchemy = "*"
+psycopg2 = "*"
+psycopg2-binary = "*"
+gunicorn = "*"
+python-dotenv= "*"
+[dev-packages]
+
+[requires]
+python_version = "3.8"
