@@ -5,6 +5,8 @@ import os
 import logging
 from logging import getLogRecordFactory, getLogger
 from logging.config import dictConfig
+
+from flask import json
 from flask_marshmallow import Marshmallow
 from flask_sqlalchemy import SQLAlchemy
 from swagger_ui_bundle import swagger_ui_3_path, swagger_ui_path
@@ -50,7 +52,14 @@ def create_app():
     conn_app.add_api(
         'openapi.yaml',
         resolver=MethodViewResolver('api'),
+        # mozliwe ze lepiej bedzie dac MethodViews w jeden views.py i je
+        # importowac w __init__, a nie z 4 roznych... chociaz to akurat irrelev
+        # CURRENT: MethodVResolver nie widzi katalogu 'api'... moze w ogole
+        # zrobic z niego jeden plik... albo add_api dodac w app_context...
+        # albo jeszcze pare innych opcji ; d
         # base_path='/api/v1',
+        # ustawienie tu base path daje alternatywna sciezke np. do /api/v1/ui
+        # jak jest poza app_contextem gdzie sa zdefiniowane url_routes do views
         options={
             "swagger_ui": True,
             "swagger_url": '/ui',
@@ -58,10 +67,12 @@ def create_app():
             "swagger_path": swagger_ui_3_path,
             },
         )
+    # !! API JEST CHYBA DODAWANE PRZED URL RULES W APP CONTEXT I TU SA INNE
+    # USTAWIENIA NIZ TAMTE??
     # Retrieve Flask() app from within it
     app = conn_app.app
     app.config.from_object(os.getenv("APP_SETTINGS", "config.DevConfig"))
-    # app.json_encoder = json.JSONEncoder
+    app.json_encoder = json.JSONEncoder
 
     # initialize extensions
     db.init_app(app)
@@ -69,40 +80,62 @@ def create_app():
 
     with app.app_context():
         # Import parts of our application
+        # db.metadata.clear()
         from . import routes, models  # not obviously necessary
+        # models are imported in api views so line above may be better below
         from api import menus_view, dishes_view, cards_view, users_view
         # create db tables - models objects
-        # db.metadata.clear()
         db.create_all()
 
-        conn_app.add_url_rule('/users', defaults={"pk": None},
-                              view_func=users_view, methods=['GET'])
-        conn_app.add_url_rule('/users', view_func=users_view,
-                              methods=['POST'])
-        conn_app.add_url_rule('/users/<int:pk>', view_func=users_view,
-                              methods=['GET', 'PUT', 'DELETE'])
-
-        conn_app.add_url_rule('/menus', defaults={"pk": None},
-                              view_func=menus_view, methods=['GET'])
-        conn_app.add_url_rule('/menus', view_func=menus_view,
-                              methods=['POST'])
-        conn_app.add_url_rule('/menus/<int:pk>', view_func=menus_view,
-                              methods=['GET', 'PUT', 'DELETE'])
-
-        conn_app.add_url_rule('/cards', defaults={"pk": None},
-                              view_func=cards_view, methods=['GET'])
-        conn_app.add_url_rule('/cards', view_func=cards_view,
-                              methods=['POST'])
-        conn_app.add_url_rule('/cards/<int:pk>', view_func=cards_view,
-                              methods=['GET', 'PUT', 'DELETE'])
-
-        conn_app.add_url_rule('/dishes', defaults={"pk": None},
-                              view_func=dishes_view, methods=['GET'])
-        conn_app.add_url_rule('/dishes', view_func=dishes_view,
-                              methods=['POST'])
-        conn_app.add_url_rule('/dishes/<int:pk>', view_func=dishes_view,
-                              methods=['GET', 'PUT', 'DELETE'])
-
+        # conn_app.add_url_rule('/users', defaults={"pk": None},
+        #                       view_func=users_view, methods=['GET'])
+        # conn_app.add_url_rule('/users', view_func=users_view,
+        #                       methods=['POST'])
+        # conn_app.add_url_rule('/users/<int:pk>', view_func=users_view,
+        #                       methods=['GET', 'PUT', 'DELETE'])
+        #
+        # conn_app.add_url_rule('/menus', defaults={"pk": None},
+        #                       view_func=menus_view, methods=['GET'])
+        # conn_app.add_url_rule('/menus', view_func=menus_view,
+        #                       methods=['POST'])
+        # conn_app.add_url_rule('/menus/<int:pk>', view_func=menus_view,
+        #                       methods=['GET', 'PUT', 'DELETE'])
+        #
+        # conn_app.add_url_rule('/cards', defaults={"pk": None},
+        #                       view_func=cards_view, methods=['GET'])
+        # conn_app.add_url_rule('/cards', view_func=cards_view,
+        #                       methods=['POST'])
+        # conn_app.add_url_rule('/cards/<int:pk>', view_func=cards_view,
+        #                       methods=['GET', 'PUT', 'DELETE'])
+        #
+        conn_app.app.url_map.strict_slashes = False  # trailing slashes fix
+        #
+        # jak jest False to standardowo sam dodaje ostatni slash, a na True
+        # wywali blad jesli... i tak i tak wywala 404, bo i tak dodaje/ : o
+        # edit: w postmanie działa - na False nie spina sie o slashe...
+        # no niby w przegladarce tez na false git...?
+        # CURRENT:
+        # CHROME: strict_slashes=True - wywala 404 jak slash sie
+        # nie zgadza (nie dotyczy /ui bo przeciez jest poza app_context pod
+        # swoim adresem /api/v1/ui, hih)
+        # POSTMAN: strict_slashes=True - tak jak w CHROME wywala 404 jak sie
+        # da nadmiarowy slash, działa!
+        # SUMMARY:
+        # strict_slashes=False pozwala uniknąć 404 przy
+        # nadmiarowym/brakujacym slashu. Podobnie jest w sumie jak sie da
+        # trailing slashe w /route/ - wtedy tez ten ostatni moze byc ale nie
+        # musi... ale chyba lepiej jest bez trailing slashy i z strict=False
+        # conn_app.add_url_rule('/dishes', defaults={"pk": None},
+        #                       view_func=dishes_view, methods=['GET'])
+        # conn_app.add_url_rule('/dishes', view_func=dishes_view,
+        #                       methods=['POST'])
+        # conn_app.add_url_rule('/dishes/<int:pk>', view_func=dishes_view,
+        #                       methods=['GET', 'PUT', 'DELETE'])
+        # ADD_URL_RULE in application.__init__:
+        # a) po zakomentowaniu /dishes są 404 mimo ze resolver mial je sam
+        # czytac z api.DishesView.get() itp...
+        # b) zeby bylo smieszniej z przegladarki /ui nie zwraca wtedy nic bez
+        # bez trailing slasha /ui/ (ale w postmanie normalnie 200OK)
 
         # Register Blueprints
         # app.register_blueprint(profile.account_bp)

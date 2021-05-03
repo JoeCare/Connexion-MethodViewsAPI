@@ -23,6 +23,7 @@ class ProdConfig(Config):
         "://", "ql://", 1)
     SQLALCHEMY_ECHO = True
     CSRF_ENABLED = True
+    JSONIFY_PRETTYPRINT_REGULAR = True
 
 
 class DevConfig(Config):
@@ -30,7 +31,7 @@ class DevConfig(Config):
     DEBUG = True
     TESTING = True
     SQLALCHEMY_ECHO = False
-    # SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     # SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(
-        BASE_DIR, 'app.db')
+    # SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(
+    #     BASE_DIR, 'app.db')

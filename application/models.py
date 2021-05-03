@@ -9,7 +9,7 @@ from sqlalchemy import (
     Column, Integer, DateTime, Table,
     TIMESTAMP, Boolean, String, ForeignKey, Text)
 from sqlalchemy.orm import relationship, declared_attr
-from . import db, mm
+from . import db
 
 
 class TimestampMixin(object):
@@ -86,7 +86,8 @@ class MenuCard(db.Model):
 
     # for m-m relation
     dishes = relationship(
-        "Dish", secondary=assoc_menu_dish, backref="menu_card")
+        "Dish", secondary=assoc_menu_dish,
+        order_by="desc(Dish.name)", backref="menu_card")
 
     created_on = Column(DateTime,
                         default=time.strftime(
@@ -151,6 +152,16 @@ class Dish(db.Model):
     def __repr__(self):
         return self.name
 
+    def __str__(self):
+        return self.name
+
+    def is_unique(self, _name):
+        query = self.query.filter_by(name=_name).one_or_none()
+        if query:
+            return False
+        else:
+            return True
+
     # def get_timestamp():
     #     return datetime.now().strftime(("%Y-%m-%d %H:%M:%S"))
 
@@ -201,42 +212,4 @@ class Dish(db.Model):
     #         return None
 
 
-class UserSchema(mm.SQLAlchemyAutoSchema):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
 
-    class Meta:
-        model = User
-        alchemy_session = db.session
-        load_instance = True
-#         # exclude = ['password', 'email']
-
-
-class MenuCardSchema(mm.SQLAlchemyAutoSchema):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    class Meta:
-        model = MenuCard
-        alchemy_session = db.session
-        load_instance = True
-
-
-class DishSchema(mm.SQLAlchemyAutoSchema):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    class Meta:
-        model = Dish
-        alchemy_session = db.session
-        load_instance = True
-
-
-users_schema = UserSchema(many=True, exclude=('id', 'password', 'email'))
-user_schema = UserSchema()
-
-menus_schema = MenuCardSchema(many=True, exclude=('id', 'public_card'))
-menu_schema = MenuCardSchema()
-
-dishes_schema = DishSchema(many=True, exclude=('id', 'image_thumbnail'))
-dish_schema = DishSchema()

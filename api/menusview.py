@@ -1,6 +1,6 @@
 from flask import jsonify
 from flask.views import MethodView
-from application.models import MenuCard  #, menu_schema, menus_schema
+from application.models import MenuCard
 
 
 class MenusView(MethodView):
@@ -20,9 +20,10 @@ class MenusView(MethodView):
         # else:
         #     return jsonify(404, "Not found any records")
 
+        # a tak wyglada chyba wersja jsonowa bez marshmallow : o
         # output = []
         #
-        # for user in menus:
+        # for menu in menus:
         #     menu_data = {}
         #     menu_data['id'] = user.public_id
         #     menu_data['name'] = user.name
