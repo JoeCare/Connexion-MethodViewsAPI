@@ -23,7 +23,7 @@ class TimestampMixin(object):
 
 class User(db.Model):
     __tablename__ = 'user'
-    __table_args__ = {'extend_existing': True}
+    # __table_args__ = {'extend_existing': True}
     id = Column(Integer, primary_key=True, autoincrement=True)
     public_id = Column(String, default=os.urandom(5).hex('X', 3),
                        nullable=False)
@@ -84,18 +84,38 @@ class MenuCard(db.Model):
     def __repr__(self):
         return self.name
 
+    def serialize(self):
+        return {
+            "name": self.name,
+            "description": self.description,
+            "vegetarian": self.vegetarian_card,
+            "dishes": self.dishes,
+            "created_on": self.created_on,
+            "changed_on": self.changed_on
+            }
+
     # for m-m relation
     dishes = relationship(
         "Dish", secondary=assoc_menu_dish,
         order_by="desc(Dish.name)", backref="menu_card")
+    # with lazy loading established for this model and backref model
+    # dishes = relationship("Dish", secondary=assoc_menu_dish,
+    #                       lazy='subquery', order_by="desc(Dish.name)",
+    #                       backref=db.backref("menu_card", lazy=True))
 
     created_on = Column(DateTime,
                         default=time.strftime(
-                            "%d.%m.%Y %H:%M:%S UTC%z",
+                            "%d.%m.%Y %H:%M:%S %z",
                             time.localtime()), nullable=False)
     changed_on = Column(DateTime, default=datetime.datetime.now,
                         onupdate=datetime.datetime.now, nullable=False)
 
+    def is_unique(self, _name):
+        query = self.query.filter_by(name=_name).one_or_none()
+        if query:
+            return False
+        else:
+            return True
     # @declared_attr
     # def created_by_fk(cls):
     #     return Column(Integer, ForeignKey("ab_user.id"),
@@ -155,6 +175,18 @@ class Dish(db.Model):
     def __str__(self):
         return self.name
 
+    def serialize(self):
+        return {
+            "name": self.name,
+            "price": self.price,
+            "description": self.description,
+            "preparation_time": f"{self.preparation_time} minutes",
+            "vegetarian": self.vegetarian,
+            "image_thumbnail": self.image_thumbnail,
+            "created_on": self.created_on,
+            "changed_on": self.changed_on
+            }
+
     def is_unique(self, _name):
         query = self.query.filter_by(name=_name).one_or_none()
         if query:
@@ -167,7 +199,7 @@ class Dish(db.Model):
 
     created_on = Column(DateTime,
                         default=time.strftime(
-                            "%d.%m.%Y %H:%M:%S UTC%z",
+                            "%d.%m.%Y %H:%M:%S %z",
                             time.localtime()), nullable=False)
     changed_on = Column(DateTime, default=datetime.datetime.now,
                         onupdate=datetime.datetime.now, nullable=False)

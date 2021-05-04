@@ -31,21 +31,6 @@ class DishesView(MethodView):
         # db.session.add(new_dish)
         # db.session.commit()
 
-        # {
-        #     "name": "Spaghetti",
-        #     "price": "14,99",
-        #     "description": "pasta with tomatoes",
-        #     "preparation_time": 40,
-        #     "vegetarian": false,
-        #     "image_thumbnail": "http://books.google.com/books/content?id=dcSbDwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
-        #     "created_on": "date",
-        #     "changed_on": "date"
-        #     }
-
-
-
-        return "post"
-
     def put(self, pk):
         pass
 
