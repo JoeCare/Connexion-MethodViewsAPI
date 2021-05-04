@@ -86,13 +86,15 @@ class MenuCard(db.Model):
 
     def serialize(self):
         return {
+            "card_id": self.id,
             "name": self.name,
             "description": self.description,
             "vegetarian": self.vegetarian_card,
-            "dishes": self.dishes,
+            "dishes": [dish.serialize() for dish in self.dishes],
             "created_on": self.created_on,
             "changed_on": self.changed_on
             }
+
 
     # for m-m relation
     dishes = relationship(
@@ -177,6 +179,7 @@ class Dish(db.Model):
 
     def serialize(self):
         return {
+            "dish_id": self.id,
             "name": self.name,
             "price": self.price,
             "description": self.description,

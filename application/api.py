@@ -74,32 +74,35 @@ class CardsView(MethodView):
     #     menu_data['created_on'] = user.admin
     #     menu_data['vegetarian_card'] = user.admin
     #     output.append(menu_data)
-
     def post(self):
         body = request.get_json()
         dishes = body.get('dishes', None)
         if dishes:
             for ids in dishes:
-                # mozna dodac jeszcze sprawdzenie czy int czy obj wczesniej
-                if type(ids) == int:  # and Dish.query.get(ids):
-                    # bo tu moze duzo db querriesow sie zrobic niepotrzebnie
-                    # bo chyba trzeba by commitowac za kazdym dodanym obj
-                    dishes.insert(dishes.index(ids), Dish.query.get(ids))
-                    print(2, dishes, ids)
-                    dishes.remove(ids)
+                print(1, dishes, ids)
+                dishes.insert(dishes.index(ids), Dish.query.get(ids))
+                print(2, dishes, ids)
+                dishes.remove(ids)
                 print(3, dishes, ids)
-            print(dishes)
-            return jsonify('disze! zebralem tyle:')
-        else:
-            return jsonify('nie podales dishes?')
+            body['dishes'] = [dish for dish in dishes if isinstance(dish, Dish)]
+            print(type(dishes[0]), dishes, body)
+            new_card = MenuCard(**body)
+            db.session.add(new_card)
+            db.session.commit()
+            return jsonify(201, 'Created')
 
-        # new_card = MenuCard(**body)
-        # if new_card.is_unique(new_card.name):
-        #     # db.session.add(new_card)
-        #     # db.session.commit()
-        #     return jsonify(201, 'Created', new_card.serialize(), 'from', body)
+        #     if new_card.is_unique(new_card.name):
+        #         # db.session.add(new_card)
+        #         # db.session.commit()
+        #         return jsonify(201, 'Created', new_card.serialize())
+        #     else:
+        #         return jsonify(400, 'Name already in database')
         # else:
-        #     return jsonify(400, 'Name already in database')
+        #     new_card = MenuCard(**body)
+        #     if new_card.is_unique(new_card.name):
+        #         return jsonify('nie podales dishes?')
+        #     else:
+        #         return jsonify(400, 'Name already in database')
 
     def put(self, pk):
         pass
