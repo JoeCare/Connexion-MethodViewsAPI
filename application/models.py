@@ -9,7 +9,7 @@ from sqlalchemy import (
     Column, Integer, DateTime, Table,
     TIMESTAMP, Boolean, String, ForeignKey, Text)
 from sqlalchemy.orm import relationship, declared_attr
-from . import db
+from . import db, mm
 
 
 class TimestampMixin(object):
@@ -78,7 +78,7 @@ class MenuCard(db.Model):
     description = Column(String(200), nullable=False, default='deliciousness?')
     vegetarian_card = Column(Boolean)
     public_card = Column(Boolean)
-
+    # dish_id = Column(Integer, ForeignKey(dish.id))
     # dishes
 
     def __repr__(self):
@@ -87,6 +87,7 @@ class MenuCard(db.Model):
     def serialize(self):
         return {
             "card_id": self.id,
+            # "REL": assoc_menu_dish.menu_dishes,
             "name": self.name,
             "description": self.description,
             "vegetarian": self.vegetarian_card,
@@ -95,11 +96,10 @@ class MenuCard(db.Model):
             "changed_on": self.changed_on
             }
 
-
     # for m-m relation
     dishes = relationship(
         "Dish", secondary=assoc_menu_dish,
-        order_by="desc(Dish.name)", backref="menu_card")
+        order_by="desc(Dish.name)", backref=db.backref("menu_card", lazy=True))
     # with lazy loading established for this model and backref model
     # dishes = relationship("Dish", secondary=assoc_menu_dish,
     #                       lazy='subquery', order_by="desc(Dish.name)",
@@ -181,6 +181,8 @@ class Dish(db.Model):
         return {
             "dish_id": self.id,
             "name": self.name,
+            # "card": [card.serialize() for card in self.menu_card],
+            # "card": self.menu_card.id,
             "price": self.price,
             "description": self.description,
             "preparation_time": f"{self.preparation_time} minutes",
