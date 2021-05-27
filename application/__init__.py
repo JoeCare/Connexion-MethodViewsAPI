@@ -4,7 +4,7 @@ import connexion
 import os
 from logging.config import dictConfig
 
-from flask import json, logging
+from flask import json
 from flask_marshmallow import Marshmallow
 from flask_sqlalchemy import SQLAlchemy
 from swagger_ui_bundle import swagger_ui_3_path
@@ -13,12 +13,14 @@ from connexion.resolver import MethodViewResolver
 dictConfig({
     'version': 1,
     'handlers': {
-        'syslog': {
-            'class': 'logging.handlers.SysLogHandler'
+        'streamh': {
+            'class': 'logging.StreamHandler',
+            'level': 'DEBUG',
+            'stream': 'ext://sys.stdout',
             }
         },
     'root': {
-        'handlers': ['syslog']
+        'handlers': ['streamh'],
         }
     })
 
@@ -37,7 +39,9 @@ def create_app():
     # initialize connexion app (with flask app inside)
     conn_app = connexion.FlaskApp(__name__, specification_dir='../', debug=True)
     conn_app.app.url_map.strict_slashes = False  # trailing slashes fix
-    conn_app.app.logger.warn("Flask logger configured!")
+
+    # conn_app.app.logger.warn("Flask logger configured!")  ?
+
     # trial with multiple apis...
     # conn_app.add_api(
     #     'swag.yaml',

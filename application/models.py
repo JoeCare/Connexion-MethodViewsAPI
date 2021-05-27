@@ -46,8 +46,8 @@ class User(db.Model):
         hashed = blake2b(salt=salted, digest_size=32, key=sec_key,
                          person=persona)
         hashed.update(pwd)
-        pwd_hashed = hashed.hexdigest()
-        return pwd_hashed
+        pwd_hashed_hex = hashed.hexdigest()
+        return pwd_hashed_hex
 
     def public_data(self):
         """Serialize record output without password"""
@@ -87,7 +87,7 @@ class MenuCard(db.Model):
     def serialize(self):
         return {
             "card_id": self.id,
-            # "REL": assoc_menu_dish.menu_dishes,
+            # "REL": self.dish,
             "name": self.name,
             "description": self.description,
             "vegetarian": self.vegetarian_card,
@@ -99,7 +99,7 @@ class MenuCard(db.Model):
     # for m-m relation
     dishes = relationship(
         "Dish", secondary=assoc_menu_dish,
-        order_by="desc(Dish.name)", backref=db.backref("menu_card", lazy=True))
+        order_by="desc(Dish.name)", backref=db.backref("cards", lazy=True))
     # with lazy loading established for this model and backref model
     # dishes = relationship("Dish", secondary=assoc_menu_dish,
     #                       lazy='subquery', order_by="desc(Dish.name)",
@@ -182,7 +182,7 @@ class Dish(db.Model):
             "dish_id": self.id,
             "name": self.name,
             # "card": [card.serialize() for card in self.menu_card],
-            # "card": self.menu_card.id,
+            # "REL": self.menus,
             "price": self.price,
             "description": self.description,
             "preparation_time": f"{self.preparation_time} minutes",
@@ -247,6 +247,4 @@ class Dish(db.Model):
     #         return g.user.id
     #     except Exception:
     #         return None
-
-
 

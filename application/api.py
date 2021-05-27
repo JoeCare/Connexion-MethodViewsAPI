@@ -1,19 +1,24 @@
 from flask import jsonify, request
 from flask.views import MethodView
-from application.models import db, Dish, MenuCard
+from application.models import db, mm, Dish, MenuCard
 
 
 class DishesView(MethodView):
     def get(self, pk):
+        logger.info('LOGGGETTTT!!!!!!!!!')
         if pk:
             dish = Dish.query.filter(Dish.id == pk).one_or_none()
             if dish:
+                logger.debug('logggerr!!!!!!!!!')
                 return jsonify(200, dish.serialize())
             else:
+                logger.debug('logggerr!!!!!!!!!')
                 return jsonify(404, 'Not found')
         else:
             dishes = Dish.query.all()
             if dishes:
+                logger.warning('logggerr!!!!!!!!!')
+                print('printerrr!!!!!!!!!')
                 return jsonify(200, [dish.serialize() for dish in dishes])
             else:
                 return jsonify(404, 'No records found')
@@ -21,17 +26,49 @@ class DishesView(MethodView):
     def post(self):
 
         body = request.get_json()
-
-        new_dish = Dish(**body)
-        if new_dish.is_unique(new_dish.name):
+        menus = body.get('cards', None)
+        if menus:
+            for ids in menus:
+                print(1, menus, ids)
+                menus.insert(menus.index(ids), MenuCard.query.get(ids))
+                print(2, menus, ids)
+                menus.remove(ids)
+                print(3, menus, ids)
+            body['cards'] = [
+                menu for menu in menus if isinstance(menu, MenuCard)]
+            print(type(menus[0]), menus, body)
+            new_dish = Dish(**body)
             db.session.add(new_dish)
             db.session.commit()
-            return jsonify(201, 'Created', new_dish.serialize(), 'from', body)
-        else:
-            return jsonify(400, 'Name already in database')
+            return jsonify(201, 'Created')
+        # new_dish = Dish(**body)   should be around 35th line
+        # if new_dish.is_unique(new_dish.name):
+        #     db.session.add(new_dish)
+        #     db.session.commit()
+        #     return jsonify(201, 'Created', new_dish.serialize(), 'from', body)
+        # else:
+        #     return jsonify(400, 'Name already in database')
 
     def put(self, pk):
-        pass
+        body = request.get_json()
+        menus = body.get('cards', None)
+        old_dish = Dish.query.get(pk)
+        if old_dish:
+            pass
+        if menus:
+            for ids in menus:
+                print(1, menus, ids)
+                menus.insert(menus.index(ids), MenuCard.query.get(ids))
+                print(2, menus, ids)
+                menus.remove(ids)
+                print(3, menus, ids)
+            body['cards'] = [
+                menu for menu in menus if isinstance(menu, MenuCard)]
+            print(type(menus[0]), menus, body)
+            new_dish = Dish(**body)
+            db.session.add(new_dish)
+            db.session.commit()
+            return jsonify(201, 'Created')
 
     def delete(self, pk):
         pass
@@ -105,7 +142,22 @@ class CardsView(MethodView):
         #         return jsonify(400, 'Name already in database')
 
     def put(self, pk):
-        pass
+
+        body = request.get_json()
+        dishes = body.get('dishes', None)
+        if dishes:
+            for ids in dishes:
+                print(1, dishes, ids)
+                dishes.insert(dishes.index(ids), Dish.query.get(ids))
+                print(2, dishes, ids)
+                dishes.remove(ids)
+                print(3, dishes, ids)
+            body['dishes'] = [dish for dish in dishes if isinstance(dish, Dish)]
+            print(type(dishes[0]), dishes, body)
+            new_card = MenuCard(**body)
+            db.session.add(new_card)
+            db.session.commit()
+            return jsonify(201, 'Created')
 
     def delete(self, pk):
         pass
